@@ -22,6 +22,7 @@ nav {
     display: flex;
     justify-content: center;
     gap: 10px;
+    flex-wrap: wrap;
 }
 
 .tab-btn {
@@ -101,7 +102,7 @@ main {
     gap: 5px;
 }
 
-button.move-btn {
+button.move-btn, .calendar-day-cell button {
     background-color: #f39c12;
     color: white;
     border: none;
@@ -109,4 +110,38 @@ button.move-btn {
     border-radius: 3px;
     cursor: pointer;
     font-size: 12px;
+}
+
+.calendar-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.calendar-controls button {
+    padding: 6px 12px;
+    border: 1px solid #cbd5e1;
+    background-color: white;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+}
+
+.calendar-day-cell {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 10px;
+    min-height: 80px;
+    border-radius: 4px;
+}
+
+.calendar-day-cell h4 {
+    margin: 0 0 5px 0;
+    font-size: 14px;
+    color: #475569;
 }
