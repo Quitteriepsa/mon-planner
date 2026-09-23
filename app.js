@@ -1,241 +1,355 @@
-let tasks = JSON.parse(localStorage.getItem('planner_tasks')) || [];
-let notes = JSON.parse(localStorage.getItem('planner_notes')) || [];
-let reviews = JSON.parse(localStorage.getItem('planner_reviews')) || [];
-let currentCalendarView = 'month';
+let taches = JSON.parse(localStorage.getItem('study_taches')) || [];
+let notes = JSON.parse(localStorage.getItem('study_notes')) || [];
+let dateActuelle = new Date();
+let dateSelectionneeStr = formaterDateCle(new Date());
 
-function switchTab(tabId) {
+// Chronomètre variables
+let chronoInterval = null;
+let tempsRestant = 25 * 60; // 25 minutes par défaut
+let chronoActif = false;
+
+document.addEventListener('DOMContentLoaded', () => {
+    const themeEnregistre = localStorage.getItem('study_theme') || 'pink';
+    const primaireEnregistree = localStorage.getItem('study_primaire') || '#ff2d55';
+    const hoverEnregistre = localStorage.getItem('study_hover') || '#c41c3e';
+
+    changerTheme(themeEnregistre, false);
+    changerCouleurPrincipale(primaireEnregistree, hoverEnregistre, false);
+
+    mettreAJourEn-têteDate();
+    rendreTaches();
+    rendreCalendrier();
+    rendreNotes();
+    mettreAJourAffichageChrono();
+});
+
+function changerOnglet(ongletId) {
     document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    
-    document.getElementById(tabId).classList.add('active');
+
+    document.getElementById(ongletId).classList.add('active');
     event.currentTarget.classList.add('active');
 
-    if (tabId === 'calendar') {
-        renderCalendar();
-    } else if (tabId === 'notes') {
-        renderNotes();
-    } else if (tabId === 'reviews') {
-        renderReviews();
+    if (ongletId === 'calendrier') {
+        rendreCalendrier();
     }
 }
 
-// Gestion des tâches
-function addTask(type) {
-    const inputId = type === 'today' ? 'task-input' : 'inbox-input';
+function mettreAJourEn-têteDate() {
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const dateStr = new Date().toLocaleDateString('fr-FR', options);
+    const element = document.getElementById('date-du-jour-str');
+    if (element) element.textContent = dateStr;
+}
+
+// Gestion des tâches et de la méthode des jours
+function ajouterTache(type) {
+    const inputId = type === 'aujourdhui' ? 'tache-aujourdhui-input' : (type === 'inbox' ? 'tache-inbox-input' : 'tache-elearning-input');
     const input = document.getElementById(inputId);
-    const text = input.value.trim();
+    const texte = input.value.trim();
 
-    if (text === '') return;
+    if (texte === '') return;
 
-    tasks.push({
+    // Détection automatique du mot "Apprendre" pour proposer la méthode des jours
+    if (texte.toLowerCase().includes('apprendre') && confirm(`Voulez-vous activer la méthode des jours (révisions espacées J0, J1, J3, J7, J14, J30) pour "${texte}" ?`)) {
+        creerSequenceRevisionSpaciees(texte);
+    }
+
+    taches.push({
         id: Date.now(),
-        text: text,
+        texte: texte,
         type: type,
-        completed: false
+        date: type === 'aujourdhui' ? formaterDateCle(new Date()) : null,
+        terminee: false
     });
 
-    saveAndRenderTasks();
+    sauvegarderEtRendre();
     input.value = '';
 }
 
-function toggleTask(id) {
-    const task = tasks.find(t => t.id === id);
-    if (task) {
-        task.completed = !task.completed;
-        saveAndRenderTasks();
+function basculerTache(id) {
+    const tache = taches.find(t => t.id === id);
+    if (tache) {
+        tache.terminee = !tache.terminee;
+        sauvegarderEtRendre();
     }
 }
 
-function moveToToday(id) {
-    const task = tasks.find(t => t.id === id);
-    if (task) {
-        task.type = 'today';
-        saveAndRenderTasks();
+function supprimerTache(id) {
+    taches = taches.filter(t => t.id !== id);
+    sauvegarderEtRendre();
+}
+
+function sauvegarderEtRendre() {
+    localStorage.setItem('study_taches', JSON.stringify(taches));
+    rendreTaches();
+    if (document.getElementById('calendrier').classList.contains('active')) {
+        rendreCalendrier();
+        rendreTachesJourSelectionne();
     }
 }
 
-function deleteTask(id) {
-    tasks = tasks.filter(t => t.id !== id);
-    saveAndRenderTasks();
-}
+function rendreTaches() {
+    const listeAujourdhui = document.getElementById('liste-aujourdhui');
+    const listeTerminees = document.getElementById('liste-terminees');
+    const listeInbox = document.getElementById('liste-inbox');
+    const listeElearning = document.getElementById('liste-elearning');
 
-function saveAndRenderTasks() {
-    localStorage.setItem('planner_tasks', JSON.stringify(tasks));
-    renderTasks();
-}
+    if (!listeAujourdhui) return;
 
-function renderTasks() {
-    const todayList = document.getElementById('today-list');
-    const completedList = document.getElementById('completed-list');
-    const inboxList = document.getElementById('inbox-list');
+    listeAujourdhui.innerHTML = '';
+    listeTerminees.innerHTML = '';
+    listeInbox.innerHTML = '';
+    listeElearning.innerHTML = '';
 
-    if (!todayList) return;
+    const cleAujourdhui = formaterDateCle(new Date());
 
-    todayList.innerHTML = '';
-    completedList.innerHTML = '';
-    inboxList.innerHTML = '';
-
-    tasks.forEach(task => {
+    taches.forEach(tache => {
         const li = document.createElement('li');
-        li.className = `task-item ${task.completed ? 'completed' : ''}`;
+        li.className = `task-item ${tache.terminee ? 'completed' : ''}`;
 
-        if (task.type === 'inbox') {
-            li.innerHTML = `
-                <span>${task.text}</span>
-                <div class="task-actions">
-                    <button class="move-btn" onclick="moveToToday(${task.id})">Aujourd'hui</button>
-                    <button onclick="deleteTask(${task.id})">❌</button>
-                </div>
-            `;
-            inboxList.appendChild(li);
-        } else if (task.type === 'today') {
-            li.innerHTML = `
-                <label>
-                    <input type="checkbox" ${task.completed ? 'checked' : ''} onclick="toggleTask(${task.id})">
-                    <span>${task.text}</span>
-                </label>
-                <button onclick="deleteTask(${task.id})">❌</button>
-            `;
-            if (task.completed) {
-                completedList.appendChild(li);
+        li.innerHTML = `
+            <label>
+                <input type="checkbox" ${tache.terminee ? 'checked' : ''} onclick="basculerTache(${tache.id})">
+                <span>${tache.texte}</span>
+            </label>
+            <button class="delete-btn" onclick="supprimerTache(${tache.id})">🗑️</button>
+        `;
+
+        if (tache.type === 'inbox') {
+            listeInbox.appendChild(li);
+        } else if (tache.type === 'elearning') {
+            listeElearning.appendChild(li);
+        } else if (tache.type === 'aujourdhui' || tache.date === cleAujourdhui) {
+            if (tache.terminee) {
+                listeTerminees.appendChild(li);
             } else {
-                todayList.appendChild(li);
+                listeAujourdhui.appendChild(li);
             }
         }
     });
 }
 
-// Révisions espacées (J0, J1, J3, J7, J14, J30)
-function addSpacedReview() {
-    const input = document.getElementById('review-input');
-    const name = input.value.trim();
-    if (name === '') return;
+// Méthode des jours (révisions espacées)
+function creerSequenceRevisionSpaciees(nomCours) {
+    const intervalles = [0, 1, 3, 7, 14, 30];
+    const dateBase = new Date();
 
-    const intervals = [0, 1, 3, 7, 14, 30];
-    intervals.forEach(day => {
-        reviews.push({
+    intervalles.forEach(decalage => {
+        const dateCible = new Date();
+        dateCible.setDate(dateBase.getDate() + decalage);
+        const cleDate = formaterDateCle(dateCible);
+
+        taches.push({
             id: Date.now() + Math.random(),
-            text: `${name} (J${day})`,
-            completed: false
+            texte: `[Révision J${decalage}] ${nomCours}`,
+            type: 'aujourdhui',
+            date: cleDate,
+            terminee: false
         });
     });
-
-    localStorage.setItem('planner_reviews', JSON.stringify(reviews));
-    renderReviews();
-    input.value = '';
-    alert('Séquence de révisions espacées générée avec succès !');
+    alert('Planning de révisions espacées généré avec succès dans votre calendrier !');
 }
 
-function toggleReview(id) {
-    const rev = reviews.find(r => r.id === id);
-    if (rev) {
-        rev.completed = !rev.completed;
-        localStorage.setItem('planner_reviews', JSON.stringify(reviews));
-        renderReviews();
+// Calendrier interactif
+function rendreCalendrier() {
+    const grille = document.getElementById('calendrier-grille');
+    const elementMoisAnnee = document.getElementById('calendrier-mois-annee');
+    if (!grille) return;
+
+    grille.innerHTML = '';
+    const annee = dateActuelle.getFullYear();
+    const mois = dateActuelle.getMonth();
+
+    const nomsMois = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+    elementMoisAnnee.textContent = `${nomsMois[mois]} ${annee}`;
+
+    const premierJourIndex = (new Date(annee, mois, 1).getDay() + 6) % 7;
+    const totalJours = new Date(annee, mois + 1, 0).getDate();
+    const cleAujourdhui = formaterDateCle(new Date());
+
+    for (let i = 0; i < premierJourIndex; i++) {
+        const celluleVide = document.createElement('div');
+        grille.appendChild(celluleVide);
     }
+
+    for (let jour = 1; jour <= totalJours; jour++) {
+        const objetDate = new Date(annee, mois, jour);
+        const cleDate = formaterDateCle(objetDate);
+        const cellule = document.createElement('div');
+        cellule.className = 'calendar-day';
+        cellule.textContent = jour;
+
+        if (cleDate === cleAujourdhui) cellule.classList.add('today');
+        if (cleDate === dateSelectionneeStr) cellule.classList.add('selected');
+
+        const possedeTaches = taches.some(t => t.date === cleDate);
+        if (possedeTaches) cellule.classList.add('has-tasks');
+
+        cellule.onclick = () => {
+            dateSelectionneeStr = cleDate;
+            rendreCalendrier();
+            rendreTachesJourSelectionne();
+        };
+
+        grille.appendChild(cellule);
+    }
+    rendreTachesJourSelectionne();
 }
 
-function deleteReview(id) {
-    reviews = reviews.filter(r => r.id !== id);
-    localStorage.setItem('planner_reviews', JSON.stringify(reviews));
-    renderReviews();
+function changerMois(direction) {
+    dateActuelle.setMonth(dateActuelle.getMonth() + direction);
+    rendreCalendrier();
 }
 
-function renderReviews() {
-    const list = document.getElementById('reviews-list');
-    if (!list) return;
+function formaterDateCle(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+}
 
-    list.innerHTML = '';
-    reviews.forEach(rev => {
+function rendreTachesJourSelectionne() {
+    const titreElement = document.getElementById('titre-jour-selectionne');
+    const listeElement = document.getElementById('liste-taches-calendrier');
+    if (!titreElement || !listeElement) return;
+
+    titreElement.textContent = `Tâches pour le ${dateSelectionneeStr.split('-').reverse().join('/')}`;
+    listeElement.innerHTML = '';
+
+    const tachesJour = taches.filter(t => t.date === dateSelectionneeStr);
+    tachesJour.forEach(tache => {
         const li = document.createElement('li');
-        li.className = `task-item ${rev.completed ? 'completed' : ''}`;
+        li.className = `task-item ${tache.terminee ? 'completed' : ''}`;
         li.innerHTML = `
             <label>
-                <input type="checkbox" ${rev.completed ? 'checked' : ''} onclick="toggleReview(${rev.id})">
-                <span>📚 ${rev.text}</span>
+                <input type="checkbox" ${tache.terminee ? 'checked' : ''} onclick="basculerTache(${tache.id})">
+                <span>${tache.texte}</span>
             </label>
-            <button onclick="deleteReview(${rev.id})">❌</button>
+            <button class="delete-btn" onclick="supprimerTache(${tache.id})">🗑️</button>
         `;
-        list.appendChild(li);
+        listeElement.appendChild(li);
     });
+}
+
+function ajouterTacheDateSelectionnee() {
+    const input = document.getElementById('tache-calendrier-input');
+    const texte = input.value.trim();
+    if (!texte) return;
+
+    if (texte.toLowerCase().includes('apprendre') && confirm(`Voulez-vous activer la méthode des jours pour "${texte}" ?`)) {
+        creerSequenceRevisionSpaciees(texte);
+    }
+
+    taches.push({
+        id: Date.now(),
+        texte: texte,
+        type: 'calendrier',
+        date: dateSelectionneeStr,
+        terminee: false
+    });
+
+    sauvegarderEtRendre();
+    input.value = '';
 }
 
 // Notes libres
-function addNote() {
-    const input = document.getElementById('note-input');
-    const text = input.value.trim();
-    if (text === '') return;
+function ajouterNote() {
+    const titreInput = document.getElementById('note-titre-input');
+    const contenuInput = document.getElementById('note-contenu-input');
+    const titre = titreInput.value.trim();
+    const contenu = contenuInput.value.trim();
 
-    notes.push({ id: Date.now(), text: text });
-    localStorage.setItem('planner_notes', JSON.stringify(notes));
-    renderNotes();
-    input.value = '';
+    if (!contenu) return;
+
+    notes.push({ id: Date.now(), titre: titre || 'Note sans titre', contenu: contenu });
+    localStorage.setItem('study_notes', JSON.stringify(notes));
+    rendreNotes();
+    titreInput.value = '';
+    contenuInput.value = '';
 }
 
-function deleteNote(id) {
+function supprimerNote(id) {
     notes = notes.filter(n => n.id !== id);
-    localStorage.setItem('planner_notes', JSON.stringify(notes));
-    renderNotes();
+    localStorage.setItem('study_notes', JSON.stringify(notes));
+    rendreNotes();
 }
 
-function renderNotes() {
-    const notesList = document.getElementById('notes-list');
-    if (!notesList) return;
+function rendreNotes() {
+    const listeNotes = document.getElementById('liste-notes');
+    if (!listeNotes) return;
+    listeNotes.innerHTML = '';
 
-    notesList.innerHTML = '';
     notes.forEach(note => {
-        const li = document.createElement('li');
-        li.className = 'task-item';
-        li.innerHTML = `
-            <span>📝 ${note.text}</span>
-            <button onclick="deleteNote(${note.id})">❌</button>
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.style.marginTop = '10px';
+        div.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <h4 style="font-size:15px; font-weight:600;">${note.titre}</h4>
+                <button class="delete-btn" onclick="supprimerNote(${note.id})">🗑️</button>
+            </div>
+            <p style="font-size:14px; color:var(--text-secondary); white-space:pre-wrap;">${note.contenu}</p>
         `;
-        notesList.appendChild(li);
+        listeNotes.appendChild(div);
     });
 }
 
-// Calendrier
-function changeView(view) {
-    currentCalendarView = view;
-    renderCalendar();
+// Chronomètre & Minuterie
+function mettreAJourAffichageChrono() {
+    const minutes = Math.floor(tempsRestant / 60);
+    const secondes = tempsRestant % 60;
+    const affichage = document.getElementById('affichage-chrono');
+    if (affichage) {
+        affichage.textContent = `${String(minutes).padStart(2, '0')}:${String(secondes).padStart(2, '0')}`;
+    }
 }
 
-function renderCalendar() {
-    const container = document.getElementById('calendar-view-container');
-    if (!container) return;
-    container.innerHTML = '';
-
-    if (currentCalendarView === 'month') {
-        let html = '<div class="calendar-grid">';
-        for (let i = 1; i <= 30; i++) {
-            html += `
-                <div class="calendar-day-cell">
-                    <h4>Jour ${i}</h4>
-                    <button onclick="addTaskOnDate(${i})">+ Tâche</button>
-                </div>
-            `;
+function demarrerChrono() {
+    if (chronoActif) return;
+    chronoActif = true;
+    chronoInterval = setInterval(() => {
+        if (tempsRestant > 0) {
+            tempsRestant--;
+            mettreAJourAffichageChrono();
+        } else {
+            clearInterval(chronoInterval);
+            chronoActif = false;
+            alert('Temps écoulé ! Excellent travail.');
         }
-        html += '</div>';
-        container.innerHTML = html;
-    } else if (currentCalendarView === 'week') {
-        container.innerHTML = '<h3>Vue Semaine</h3><p>Fonctionnalité en cours de développement.</p>';
-    } else {
-        container.innerHTML = '<h3>Vue Jour</h3><p>Fonctionnalité en cours de développement.</p>';
-    }
+    }, 1000);
 }
 
-function addTaskOnDate(dayNumber) {
-    const taskText = prompt(`Ajouter une tâche pour le jour ${dayNumber} :`);
-    if (taskText) {
-        tasks.push({
-            id: Date.now(),
-            text: `[Jour ${dayNumber}] ${taskText}`,
-            type: 'today',
-            completed: false
-        });
-        saveAndRenderTasks();
-        alert('Tâche ajoutée à votre liste du jour !');
-    }
+function mettreEnPauseChrono() {
+    clearInterval(chronoInterval);
+    chronoActif = false;
 }
 
-renderTasks();
+function reinitialiserChrono() {
+    clearInterval(chronoInterval);
+    chronoActif = false;
+    tempsRestant = 25 * 60;
+    mettreAJourAffichageChrono();
+}
+
+function definirMinuterie(minutes) {
+    clearInterval(chronoInterval);
+    chronoActif = false;
+    tempsRestant = minutes * 60;
+    mettreAJourAffichageChrono();
+}
+
+// Personnalisation
+function changerTheme(theme, sauvegarder = true) {
+    document.body.setAttribute('data-theme', theme);
+    if (sauvegarder) localStorage.setItem('study_theme', theme);
+}
+
+function changerCouleurPrincipale(couleur, couleurHover, sauvegarder = true) {
+    document.documentElement.style.setProperty('--primary-color', couleur);
+    document.documentElement.style.setProperty('--primary-hover', couleurHover);
+    if (sauvegarder) {
+        localStorage.setItem('study_primaire', couleur);
+        localStorage.setItem('study_hover', couleurHover);
+    }
+}
