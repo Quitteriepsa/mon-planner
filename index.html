@@ -3,71 +3,189 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mon Planner Complet</title>
+    <title>Study</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body>
-    <header>
-        <h1>Mon Planner</h1>
-        <nav>
-            <button class="tab-btn active" onclick="switchTab('accueil')">Accueil</button>
-            <button class="tab-btn" onclick="switchTab('inbox')">Inbox</button>
-            <button class="tab-btn" onclick="switchTab('calendar')">Calendrier</button>
-            <button class="tab-btn" onclick="switchTab('reviews')">Révisions</button>
-            <button class="tab-btn" onclick="switchTab('notes')">Notes</button>
-        </nav>
-    </header>
-
-    <main>
-        <section id="accueil" class="tab-content active">
-            <h2>Aujourd'hui</h2>
-            <div class="task-input-container">
-                <input type="text" id="task-input" placeholder="Ajouter une tâche rapide...">
-                <button onclick="addTask('today')">Ajouter</button>
+<body data-theme="light">
+    <div class="app-container">
+        <!-- Menu latéral -->
+        <aside class="sidebar">
+            <div class="app-brand">
+                <h2>Study</h2>
             </div>
-            <h3>À faire</h3>
-            <ul id="today-list" class="task-list"></ul>
-            <h3>Terminées</h3>
-            <ul id="completed-list" class="task-list"></ul>
-        </section>
+            <nav class="nav-menu">
+                <button class="tab-btn active" onclick="changerOnglet('aujourdhui')">
+                    <span class="icon">☀️</span> Aujourd'hui
+                </button>
+                <button class="tab-btn" onclick="changerOnglet('inbox')">
+                    <span class="icon">📥</span> Boîte de réception
+                </button>
+                <button class="tab-btn" onclick="changerOnglet('elearning')">
+                    <span class="icon">📂</span> E-learning
+                </button>
+                <button class="tab-btn" onclick="changerOnglet('calendrier')">
+                    <span class="icon">📅</span> Calendrier
+                </button>
+                <button class="tab-btn" onclick="changerOnglet('notes')">
+                    <span class="icon">📝</span> Notes
+                </button>
+                <button class="tab-btn" onclick="changerOnglet('chrono')">
+                    <span class="icon">⏱️</span> Chronomètre
+                </button>
+                <button class="tab-btn" onclick="changerOnglet('parametres')">
+                    <span class="icon">⚙️</span> Personnalisation
+                </button>
+            </nav>
+        </aside>
 
-        <section id="inbox" class="tab-content">
-            <h2>Inbox (Sans date)</h2>
-            <div class="task-input-container">
-                <input type="text" id="inbox-input" placeholder="Nouvelle idée ou tâche sans date...">
-                <button onclick="addTask('inbox')">Ajouter</button>
-            </div>
-            <ul id="inbox-list" class="task-list"></ul>
-        </section>
+        <!-- Contenu principal -->
+        <main class="main-content">
+            <!-- Aujourd'hui -->
+            <section id="aujourdhui" class="tab-content active">
+                <header class="section-header">
+                    <h2>Aujourd'hui</h2>
+                    <p id="date-du-jour-str"></p>
+                </header>
+                <div class="card input-card">
+                    <input type="text" id="tache-aujourdhui-input" placeholder="Ajouter une tâche (ex: Apprendre UE A1)...">
+                    <button class="btn-principal" onclick="ajouterTache('aujourdhui')">Ajouter</button>
+                </div>
+                <div class="card">
+                    <h3>À faire</h3>
+                    <ul id="liste-aujourdhui" class="task-list"></ul>
+                </div>
+                <div class="card">
+                    <h3>Terminées</h3>
+                    <ul id="liste-terminees" class="task-list completed-section"></ul>
+                </div>
+            </section>
 
-        <section id="calendar" class="tab-content">
-            <h2>Calendrier</h2>
-            <div class="calendar-controls">
-                <button onclick="changeView('month')">Mois</button>
-                <button onclick="changeView('week')">Semaine</button>
-                <button onclick="changeView('day')">Jour</button>
-            </div>
-            <div id="calendar-view-container"></div>
-        </section>
+            <!-- Boîte de réception -->
+            <section id="inbox" class="tab-content">
+                <header class="section-header">
+                    <h2>Boîte de réception</h2>
+                    <p>Toutes vos idées et tâches en vrac</p>
+                </header>
+                <div class="card input-card">
+                    <input type="text" id="tache-inbox-input" placeholder="Nouvelle tâche en attente...">
+                    <button class="btn-principal" onclick="ajouterTache('inbox')">Ajouter</button>
+                </div>
+                <div class="card">
+                    <ul id="liste-inbox" class="task-list"></ul>
+                </div>
+            </section>
 
-        <section id="reviews" class="tab-content">
-            <h2>Révisions espacées (J0, J1, J3...)</h2>
-            <div class="task-input-container">
-                <input type="text" id="review-input" placeholder="Ex: Apprendre UE A1...">
-                <button onclick="addSpacedReview()">Créer les révisions</button>
-            </div>
-            <ul id="reviews-list" class="task-list"></ul>
-        </section>
+            <!-- E-learning -->
+            <section id="elearning" class="tab-content">
+                <header class="section-header">
+                    <h2>E-learning</h2>
+                    <p>Vos cours et matières en ligne</p>
+                </header>
+                <div class="card input-card">
+                    <input type="text" id="tache-elearning-input" placeholder="Ajouter un cours E-learning...">
+                    <button class="btn-principal" onclick="ajouterTache('elearning')">Ajouter</button>
+                </div>
+                <div class="card">
+                    <ul id="liste-elearning" class="task-list"></ul>
+                </div>
+            </section>
 
-        <section id="notes" class="tab-content">
-            <h2>Notes libres</h2>
-            <div class="task-input-container">
-                <input type="text" id="note-input" placeholder="Écrire une note...">
-                <button onclick="addNote()">Ajouter</button>
-            </div>
-            <ul id="notes-list" class="task-list"></ul>
-        </section>
-    </main>
+            <!-- Calendrier -->
+            <section id="calendrier" class="tab-content">
+                <header class="section-header">
+                    <h2>Calendrier</h2>
+                    <div class="calendar-nav-header">
+                        <button class="btn-secondaire" onclick="changerMois(-1)">Mois précédent</button>
+                        <h3 id="calendrier-mois-annee"></h3>
+                        <button class="btn-secondaire" onclick="changerMois(1)">Mois suivant</button>
+                    </div>
+                </header>
+                <div class="card calendar-card">
+                    <div class="weekdays-grid">
+                        <span>Lun</span><span>Mar</span><span>Mer</span><span>Jeu</span><span>Ven</span><span>Sam</span><span>Dim</span>
+                    </div>
+                    <div id="calendrier-grille" class="days-grid"></div>
+                </div>
+                <div class="card" id="detail-jour-card" style="margin-top: 20px;">
+                    <h3 id="titre-jour-selectionne">Sélectionnez un jour</h3>
+                    <div class="task-input-container" style="margin-top: 15px; display: flex; gap: 12px;">
+                        <input type="text" id="tache-calendrier-input" placeholder="Ajouter une tâche à cette date (ex: Apprendre...).">
+                        <button class="btn-principal" onclick="ajouterTacheDateSelectionnee()">Ajouter</button>
+                    </div>
+                    <ul id="liste-taches-calendrier" class="task-list" style="margin-top: 15px;"></ul>
+                </div>
+            </section>
+
+            <!-- Notes -->
+            <section id="notes" class="tab-content">
+                <header class="section-header">
+                    <h2>Notes libres</h2>
+                    <p>Écrivez tout ce que vous voulez</p>
+                </header>
+                <div class="card input-card">
+                    <input type="text" id="note-titre-input" placeholder="Titre de la note...">
+                </div>
+                <div class="card">
+                    <textarea id="note-contenu-input" placeholder="Rédigez votre note ici..." rows="6" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:10px; background:transparent; color:var(--text-color); outline:none; resize:vertical; font-size:14px;"></textarea>
+                    <button class="btn-principal" onclick="ajouterNote()" style="margin-top: 10px;">Enregistrer la note</button>
+                </div>
+                <div class="card">
+                    <h3>Mes notes</h3>
+                    <div id="liste-notes"></div>
+                </div>
+            </section>
+
+            <!-- Chronomètre -->
+            <section id="chrono" class="tab-content">
+                <header class="section-header">
+                    <h2>Chronomètre & Minuterie</h2>
+                    <p>Idéal pour la méthode Pomodoro ou vos révisions</p>
+                </header>
+                <div class="card chrono-card" style="text-align: center; padding: 40px;">
+                    <h1 id="affichage-chrono" style="font-size: 64px; font-weight: 700; margin-bottom: 20px; font-variant-numeric: tabular-nums;">25:00</h1>
+                    <div class="chrono-controls" style="display: flex; justify-content: center; gap: 12px; margin-bottom: 20px;">
+                        <button class="btn-principal" onclick="demarrerChrono()">Démarrer</button>
+                        <button class="btn-secondaire" onclick="mettreEnPauseChrono()">Pause</button>
+                        <button class="btn-secondaire" onclick="reinitialiserChrono()">Réinitialiser</button>
+                    </div>
+                    <div class="chrono-presets" style="display: flex; justify-content: center; gap: 8px;">
+                        <button class="btn-secondaire" onclick="definirMinuterie(25)">25 min</button>
+                        <button class="btn-secondaire" onclick="definirMinuterie(15)">15 min</button>
+                        <button class="btn-secondaire" onclick="definirMinuterie(5)">5 min</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Personnalisation -->
+            <section id="parametres" class="tab-content">
+                <header class="section-header">
+                    <h2>Personnalisation</h2>
+                    <p>Adaptez les couleurs et le style de Study</p>
+                </header>
+                <div class="card settings-card">
+                    <div class="setting-group">
+                        <label>Thème visuel :</label>
+                        <div class="theme-options" style="margin-top: 10px;">
+                            <button class="btn-secondaire" onclick="changerTheme('light')">☀️ Clair</button>
+                            <button class="btn-secondaire" onclick="changerTheme('dark')">🌙 Sombre</button>
+                            <button class="btn-secondaire" onclick="changerTheme('pink')">🌸 Rose pastel</button>
+                        </div>
+                    </div>
+                    <div class="setting-group" style="margin-top: 20px;">
+                        <label>Couleur principale :</label>
+                        <div class="color-options" style="display: flex; gap: 12px; margin-top: 10px;">
+                            <span class="color-dot" style="background: #007aff;" onclick="changerCouleurPrincipale('#007aff', '#005ec4')"></span>
+                            <span class="color-dot" style="background: #ff2d55;" onclick="changerCouleurPrincipale('#ff2d55', '#c41c3e')"></span>
+                            <span class="color-dot" style="background: #af52de;" onclick="changerCouleurPrincipale('#af52de', '#8438ab')"></span>
+                            <span class="color-dot" style="background: #ff9500;" onclick="changerCouleurPrincipale('#ff9500', '#c67300')"></span>
+                            <span class="color-dot" style="background: #34c759;" onclick="changerCouleurPrincipale('#34c759', '#248a3d')"></span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
 
     <script src="app.js"></script>
 </body>
