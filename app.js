@@ -1,4 +1,6 @@
 let tasks = JSON.parse(localStorage.getItem('planner_tasks')) || [];
+let notes = JSON.parse(localStorage.getItem('planner_notes')) || [];
+let reviews = JSON.parse(localStorage.getItem('planner_reviews')) || [];
 let currentCalendarView = 'month';
 
 function switchTab(tabId) {
@@ -10,9 +12,14 @@ function switchTab(tabId) {
 
     if (tabId === 'calendar') {
         renderCalendar();
+    } else if (tabId === 'notes') {
+        renderNotes();
+    } else if (tabId === 'reviews') {
+        renderReviews();
     }
 }
 
+// Gestion des tâches
 function addTask(type) {
     const inputId = type === 'today' ? 'task-input' : 'inbox-input';
     const input = document.getElementById(inputId);
@@ -20,15 +27,14 @@ function addTask(type) {
 
     if (text === '') return;
 
-    const newTask = {
+    tasks.push({
         id: Date.now(),
         text: text,
         type: type,
         completed: false
-    };
+    });
 
-    tasks.push(newTask);
-    saveAndRender();
+    saveAndRenderTasks();
     input.value = '';
 }
 
@@ -36,7 +42,7 @@ function toggleTask(id) {
     const task = tasks.find(t => t.id === id);
     if (task) {
         task.completed = !task.completed;
-        saveAndRender();
+        saveAndRenderTasks();
     }
 }
 
@@ -44,16 +50,16 @@ function moveToToday(id) {
     const task = tasks.find(t => t.id === id);
     if (task) {
         task.type = 'today';
-        saveAndRender();
+        saveAndRenderTasks();
     }
 }
 
 function deleteTask(id) {
     tasks = tasks.filter(t => t.id !== id);
-    saveAndRender();
+    saveAndRenderTasks();
 }
 
-function saveAndRender() {
+function saveAndRenderTasks() {
     localStorage.setItem('planner_tasks', JSON.stringify(tasks));
     renderTasks();
 }
@@ -99,6 +105,96 @@ function renderTasks() {
     });
 }
 
+// Révisions espacées (J0, J1, J3, J7, J14, J30)
+function addSpacedReview() {
+    const input = document.getElementById('review-input');
+    const name = input.value.trim();
+    if (name === '') return;
+
+    const intervals = [0, 1, 3, 7, 14, 30];
+    intervals.forEach(day => {
+        reviews.push({
+            id: Date.now() + Math.random(),
+            text: `${name} (J${day})`,
+            completed: false
+        });
+    });
+
+    localStorage.setItem('planner_reviews', JSON.stringify(reviews));
+    renderReviews();
+    input.value = '';
+    alert('Séquence de révisions espacées générée avec succès !');
+}
+
+function toggleReview(id) {
+    const rev = reviews.find(r => r.id === id);
+    if (rev) {
+        rev.completed = !rev.completed;
+        localStorage.setItem('planner_reviews', JSON.stringify(reviews));
+        renderReviews();
+    }
+}
+
+function deleteReview(id) {
+    reviews = reviews.filter(r => r.id !== id);
+    localStorage.setItem('planner_reviews', JSON.stringify(reviews));
+    renderReviews();
+}
+
+function renderReviews() {
+    const list = document.getElementById('reviews-list');
+    if (!list) return;
+
+    list.innerHTML = '';
+    reviews.forEach(rev => {
+        const li = document.createElement('li');
+        li.className = `task-item ${rev.completed ? 'completed' : ''}`;
+        li.innerHTML = `
+            <label>
+                <input type="checkbox" ${rev.completed ? 'checked' : ''} onclick="toggleReview(${rev.id})">
+                <span>📚 ${rev.text}</span>
+            </label>
+            <button onclick="deleteReview(${rev.id})">❌</button>
+        `;
+        list.appendChild(li);
+    });
+}
+
+// Notes libres
+function addNote() {
+    const input = document.getElementById('note-input');
+    const text = input.value.trim();
+    if (text === '') return;
+
+    notes.push({ id: Date.now(), text: text });
+    localStorage.setItem('planner_notes', JSON.stringify(notes));
+    renderNotes();
+    input.value = '';
+}
+
+function deleteNote(id) {
+    notes = notes.filter(n => n.id !== id);
+    localStorage.setItem('planner_notes', JSON.stringify(notes));
+    renderNotes();
+}
+
+function renderNotes() {
+    const notesList = document.getElementById('notes-list');
+    if (!notesList) return;
+
+    notesList.innerHTML = '';
+    notes.forEach(note => {
+        const li = document.createElement('li');
+        li.className = 'task-item';
+        li.innerHTML = `
+            <span>📝 ${note.text}</span>
+            <button onclick="deleteNote(${note.id})">❌</button>
+        `;
+        notesList.appendChild(li);
+    });
+}
+
+// Calendrier
 function changeView(view) {
     currentCalendarView = view;
     renderCalendar();
@@ -137,7 +233,7 @@ function addTaskOnDate(dayNumber) {
             type: 'today',
             completed: false
         });
-        saveAndRender();
+        saveAndRenderTasks();
         alert('Tâche ajoutée à votre liste du jour !');
     }
 }
