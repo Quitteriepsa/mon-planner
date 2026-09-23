@@ -1,14 +1,45 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mon Planner</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Planner</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Mon Planner</h1>
-  <p>Mon application fonctionne !</p>
-  <script src="app.js"></script>
+    <header>
+        <h1>Mon Planner</h1>
+        <nav>
+            <button class="tab-btn active" onclick="switchTab('accueil')">Accueil / Aujourd'hui</button>
+            <button class="tab-btn" onclick="switchTab('inbox')">Inbox</button>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Onglet Accueil / Aujourd'hui -->
+        <section id="accueil" class="tab-content active">
+            <h2>Aujourd'hui</h2>
+            <div class="task-input-container">
+                <input type="text" id="task-input" placeholder="Ajouter une tâche rapide...">
+                <button onclick="addTask('today')">Ajouter</button>
+            </div>
+            <h3>À faire</h3>
+            <ul id="today-list" class="task-list"></ul>
+            <h3>Terminées</h3>
+            <ul id="completed-list" class="task-list"></ul>
+        </section>
+
+        <!-- Onglet Inbox -->
+        <section id="inbox" class="tab-content">
+            <h2>Inbox (Sans date)</h2>
+            <div class="task-input-container">
+                <input type="text" id="inbox-input" placeholder="Nouvelle idée ou tâche sans date...">
+                <button onclick="addTask('inbox')">Ajouter à l'Inbox</button>
+            </div>
+            <ul id="inbox-list" class="task-list"></ul>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
 </body>
 </html>
