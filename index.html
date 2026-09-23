@@ -3,21 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mon Planner</title>
+    <title>Mon Planner Complet</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header>
         <h1>Mon Planner</h1>
         <nav>
-            <button class="tab-btn active" onclick="switchTab('accueil')">Accueil / Aujourd'hui</button>
+            <button class="tab-btn active" onclick="switchTab('accueil')">Accueil</button>
             <button class="tab-btn" onclick="switchTab('inbox')">Inbox</button>
             <button class="tab-btn" onclick="switchTab('calendar')">Calendrier</button>
+            <button class="tab-btn" onclick="switchTab('reviews')">Révisions</button>
+            <button class="tab-btn" onclick="switchTab('notes')">Notes</button>
         </nav>
     </header>
 
     <main>
-        <!-- Onglet Accueil / Aujourd'hui -->
         <section id="accueil" class="tab-content active">
             <h2>Aujourd'hui</h2>
             <div class="task-input-container">
@@ -30,17 +31,15 @@
             <ul id="completed-list" class="task-list"></ul>
         </section>
 
-        <!-- Onglet Inbox -->
         <section id="inbox" class="tab-content">
             <h2>Inbox (Sans date)</h2>
             <div class="task-input-container">
                 <input type="text" id="inbox-input" placeholder="Nouvelle idée ou tâche sans date...">
-                <button onclick="addTask('inbox')">Ajouter à l'Inbox</button>
+                <button onclick="addTask('inbox')">Ajouter</button>
             </div>
             <ul id="inbox-list" class="task-list"></ul>
         </section>
 
-        <!-- Onglet Calendrier -->
         <section id="calendar" class="tab-content">
             <h2>Calendrier</h2>
             <div class="calendar-controls">
@@ -49,6 +48,24 @@
                 <button onclick="changeView('day')">Jour</button>
             </div>
             <div id="calendar-view-container"></div>
+        </section>
+
+        <section id="reviews" class="tab-content">
+            <h2>Révisions espacées (J0, J1, J3...)</h2>
+            <div class="task-input-container">
+                <input type="text" id="review-input" placeholder="Ex: Apprendre UE A1...">
+                <button onclick="addSpacedReview()">Créer les révisions</button>
+            </div>
+            <ul id="reviews-list" class="task-list"></ul>
+        </section>
+
+        <section id="notes" class="tab-content">
+            <h2>Notes libres</h2>
+            <div class="task-input-container">
+                <input type="text" id="note-input" placeholder="Écrire une note...">
+                <button onclick="addNote()">Ajouter</button>
+            </div>
+            <ul id="notes-list" class="task-list"></ul>
         </section>
     </main>
 
