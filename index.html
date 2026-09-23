@@ -3,190 +3,298 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Study</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Interface Productivité - Pastel Aesthetic</title>
+    <style>
+        /* --- VARIABLES DE COULEURS (Inspirées des captures) --- */
+        :root {
+            --sidebar-bg: #ff758c;          /* Rose vif de la barre latérale */
+            --sidebar-icon-active: #ffffff;  /* Blanc pour l'élément actif */
+            --sidebar-icon: rgba(255, 255, 255, 0.7);
+            --main-bg: #fff5f7;            /* Fond général très léger rose/crème */
+            --panel-bg: #ffffff;           /* Fond des blocs / cartes */
+            --text-main: #2d3142;          /* Texte principal sombre */
+            --text-muted: #9a9ea6;         /* Texte secondaire / gris */
+            
+            /* Couleurs pastel pour les blocs / tâches */
+            --pastel-blue: #c4d7ed;
+            --pastel-pink: #f5d6ce;
+            --pastel-green: #d0e1d4;
+            --pastel-purple: #e2d9f3;
+            --pastel-peach: #fae1dd;
+            
+            --border-color: #f0f0f2;
+        }
+
+        /* --- MISE EN PAGE GÉNÉRALE --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--main-bg);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- BARRE LATÉRALE (Sidebar rose) --- */
+        aside {
+            width: 70px;
+            background-color: var(--sidebar-bg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+            justify-content: space-between;
+        }
+
+        .sidebar-top, .sidebar-bottom {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .nav-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--sidebar-icon);
+            cursor: pointer;
+            transition: background 0.2s;
+            font-size: 1.1rem;
+        }
+
+        .nav-icon.active {
+            background-color: rgba(255, 255, 255, 0.25);
+            color: var(--sidebar-icon-active);
+        }
+
+        .nav-icon:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+            color: var(--sidebar-icon-active);
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #ffd3d9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        /* --- CONTENEUR PRINCIPAL --- */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--panel-bg);
+            border-top-left-radius: 16px;
+            border-bottom-left-radius: 16px;
+            box-shadow: -5px 0 20px rgba(0, 0, 0, 0.03);
+            margin-top: 8px;
+            margin-bottom: 8px;
+            overflow: hidden;
+        }
+
+        /* En-tête */
+        header {
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        h1 {
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .header-actions button {
+            background: #fff;
+            border: 1px solid var(--border-color);
+            padding: 6px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: var(--text-main);
+            transition: background 0.2s;
+        }
+
+        .header-actions button:hover {
+            background: var(--main-bg);
+        }
+
+        /* --- CONTENU DU TABLEAU DE BORD (Grille / Agenda) --- */
+        .dashboard-content {
+            flex: 1;
+            padding: 30px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            overflow-y: auto;
+        }
+
+        /* Styles des cartes pastel (façon événements d'agenda ou blocs de tâches) */
+        .card {
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 140px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .card-time {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+
+        /* Variantes de couleurs pastel pour les cartes */
+        .card.blue { background-color: var(--pastel-blue); color: #23426b; }
+        .card.pink { background-color: var(--pastel-pink); color: #6b342e; }
+        .card.green { background-color: var(--pastel-green); color: #27442d; }
+        .card.purple { background-color: var(--pastel-purple); color: #433361; }
+        .card.peach { background-color: var(--pastel-peach); color: #633c38; }
+
+        /* Style des cases à cocher miniatures */
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        input[type="checkbox"] {
+            accent-color: currentColor;
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+    </style>
 </head>
-<body data-theme="light">
-    <div class="app-container">
-        <!-- Menu latéral -->
-        <aside class="sidebar">
-            <div class="app-brand">
-                <h2>Study</h2>
+<body>
+
+    <!-- Barre latérale rose -->
+    <aside>
+        <div class="sidebar-top">
+            <div class="user-avatar">A</div>
+            <div class="nav-icon active">📅</div>
+            <div class="nav-icon">☑️</div>
+            <div class="nav-icon">🍅</div>
+            <div class="nav-icon">📊</div>
+        </div>
+        <div class="sidebar-bottom">
+            <div class="nav-icon">⚙️</div>
+        </div>
+    </aside>
+
+    <!-- Zone principale -->
+    <main>
+        <header>
+            <h1>septembre</h1>
+            <div class="header-actions">
+                <button>Aujourd'hui</button>
             </div>
-            <nav class="nav-menu">
-                <button class="tab-btn active" onclick="changerOnglet('aujourdhui')">
-                    <span class="icon">☀️</span> Aujourd'hui
-                </button>
-                <button class="tab-btn" onclick="changerOnglet('inbox')">
-                    <span class="icon">📥</span> Boîte de réception
-                </button>
-                <button class="tab-btn" onclick="changerOnglet('elearning')">
-                    <span class="icon">📂</span> E-learning
-                </button>
-                <button class="tab-btn" onclick="changerOnglet('calendrier')">
-                    <span class="icon">📅</span> Calendrier
-                </button>
-                <button class="tab-btn" onclick="changerOnglet('notes')">
-                    <span class="icon">📝</span> Notes
-                </button>
-                <button class="tab-btn" onclick="changerOnglet('chrono')">
-                    <span class="icon">⏱️</span> Chronomètre
-                </button>
-                <button class="tab-btn" onclick="changerOnglet('parametres')">
-                    <span class="icon">⚙️</span> Personnalisation
-                </button>
-            </nav>
-        </aside>
+        </header>
 
-        <!-- Contenu principal -->
-        <main class="main-content">
-            <!-- Aujourd'hui -->
-            <section id="aujourdhui" class="tab-content active">
-                <header class="section-header">
-                    <h2>Aujourd'hui</h2>
-                    <p id="date-du-jour-str"></p>
-                </header>
-                <div class="card input-card">
-                    <input type="text" id="tache-aujourdhui-input" placeholder="Ajouter une tâche (ex: Apprendre UE A1)...">
-                    <button class="btn-principal" onclick="ajouterTache('aujourdhui')">Ajouter</button>
-                </div>
-                <div class="card">
-                    <h3>À faire</h3>
-                    <ul id="liste-aujourdhui" class="task-list"></ul>
-                </div>
-                <div class="card">
-                    <h3>Terminées</h3>
-                    <ul id="liste-terminees" class="task-list completed-section"></ul>
-                </div>
-            </section>
-
-            <!-- Boîte de réception -->
-            <section id="inbox" class="tab-content">
-                <header class="section-header">
-                    <h2>Boîte de réception</h2>
-                    <p>Toutes vos idées et tâches en vrac</p>
-                </header>
-                <div class="card input-card">
-                    <input type="text" id="tache-inbox-input" placeholder="Nouvelle tâche en attente...">
-                    <button class="btn-principal" onclick="ajouterTache('inbox')">Ajouter</button>
-                </div>
-                <div class="card">
-                    <ul id="liste-inbox" class="task-list"></ul>
-                </div>
-            </section>
-
-            <!-- E-learning -->
-            <section id="elearning" class="tab-content">
-                <header class="section-header">
-                    <h2>E-learning</h2>
-                    <p>Vos cours et matières en ligne</p>
-                </header>
-                <div class="card input-card">
-                    <input type="text" id="tache-elearning-input" placeholder="Ajouter un cours E-learning...">
-                    <button class="btn-principal" onclick="ajouterTache('elearning')">Ajouter</button>
-                </div>
-                <div class="card">
-                    <ul id="liste-elearning" class="task-list"></ul>
-                </div>
-            </section>
-
-            <!-- Calendrier -->
-            <section id="calendrier" class="tab-content">
-                <header class="section-header">
-                    <h2>Calendrier</h2>
-                    <div class="calendar-nav-header">
-                        <button class="btn-secondaire" onclick="changerMois(-1)">Mois précédent</button>
-                        <h3 id="calendrier-mois-annee"></h3>
-                        <button class="btn-secondaire" onclick="changerMois(1)">Mois suivant</button>
-                    </div>
-                </header>
-                <div class="card calendar-card">
-                    <div class="weekdays-grid">
-                        <span>Lun</span><span>Mar</span><span>Mer</span><span>Jeu</span><span>Ven</span><span>Sam</span><span>Dim</span>
-                    </div>
-                    <div id="calendrier-grille" class="days-grid"></div>
-                </div>
-                <div class="card" id="detail-jour-card" style="margin-top: 20px;">
-                    <h3 id="titre-jour-selectionne">Sélectionnez un jour</h3>
-                    <div class="task-input-container" style="margin-top: 15px; display: flex; gap: 12px;">
-                        <input type="text" id="tache-calendrier-input" placeholder="Ajouter une tâche à cette date (ex: Apprendre...).">
-                        <button class="btn-principal" onclick="ajouterTacheDateSelectionnee()">Ajouter</button>
-                    </div>
-                    <ul id="liste-taches-calendrier" class="task-list" style="margin-top: 15px;"></ul>
-                </div>
-            </section>
-
-            <!-- Notes -->
-            <section id="notes" class="tab-content">
-                <header class="section-header">
-                    <h2>Notes libres</h2>
-                    <p>Écrivez tout ce que vous voulez</p>
-                </header>
-                <div class="card input-card">
-                    <input type="text" id="note-titre-input" placeholder="Titre de la note...">
-                </div>
-                <div class="card">
-                    <textarea id="note-contenu-input" placeholder="Rédigez votre note ici..." rows="6" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:10px; background:transparent; color:var(--text-color); outline:none; resize:vertical; font-size:14px;"></textarea>
-                    <button class="btn-principal" onclick="ajouterNote()" style="margin-top: 10px;">Enregistrer la note</button>
-                </div>
-                <div class="card">
-                    <h3>Mes notes</h3>
-                    <div id="liste-notes"></div>
-                </div>
-            </section>
-
-            <!-- Chronomètre -->
-            <section id="chrono" class="tab-content">
-                <header class="section-header">
-                    <h2>Chronomètre & Minuterie</h2>
-                    <p>Idéal pour la méthode Pomodoro ou vos révisions</p>
-                </header>
-                <div class="card chrono-card" style="text-align: center; padding: 40px;">
-                    <h1 id="affichage-chrono" style="font-size: 64px; font-weight: 700; margin-bottom: 20px; font-variant-numeric: tabular-nums;">25:00</h1>
-                    <div class="chrono-controls" style="display: flex; justify-content: center; gap: 12px; margin-bottom: 20px;">
-                        <button class="btn-principal" onclick="demarrerChrono()">Démarrer</button>
-                        <button class="btn-secondaire" onclick="mettreEnPauseChrono()">Pause</button>
-                        <button class="btn-secondaire" onclick="reinitialiserChrono()">Réinitialiser</button>
-                    </div>
-                    <div class="chrono-presets" style="display: flex; justify-content: center; gap: 8px;">
-                        <button class="btn-secondaire" onclick="definirMinuterie(25)">25 min</button>
-                        <button class="btn-secondaire" onclick="definirMinuterie(15)">15 min</button>
-                        <button class="btn-secondaire" onclick="definirMinuterie(5)">5 min</button>
+        <!-- Grille de cartes / tâches -->
+        <div class="dashboard-content">
+            
+            <div class="card blue">
+                <div>
+                    <div class="card-header">
+                        <span class="checkbox-container">
+                            <input type="checkbox" checked> Planning a video
+                        </span>
                     </div>
                 </div>
-            </section>
+                <div class="card-time">8:30 - 9:30</div>
+            </div>
 
-            <!-- Personnalisation -->
-            <section id="parametres" class="tab-content">
-                <header class="section-header">
-                    <h2>Personnalisation</h2>
-                    <p>Adaptez les couleurs et le style de Study</p>
-                </header>
-                <div class="card settings-card">
-                    <div class="setting-group">
-                        <label>Thème visuel :</label>
-                        <div class="theme-options" style="margin-top: 10px;">
-                            <button class="btn-secondaire" onclick="changerTheme('light')">☀️ Clair</button>
-                            <button class="btn-secondaire" onclick="changerTheme('dark')">🌙 Sombre</button>
-                            <button class="btn-secondaire" onclick="changerTheme('pink')">🌸 Rose pastel</button>
-                        </div>
-                    </div>
-                    <div class="setting-group" style="margin-top: 20px;">
-                        <label>Couleur principale :</label>
-                        <div class="color-options" style="display: flex; gap: 12px; margin-top: 10px;">
-                            <span class="color-dot" style="background: #007aff;" onclick="changerCouleurPrincipale('#007aff', '#005ec4')"></span>
-                            <span class="color-dot" style="background: #ff2d55;" onclick="changerCouleurPrincipale('#ff2d55', '#c41c3e')"></span>
-                            <span class="color-dot" style="background: #af52de;" onclick="changerCouleurPrincipale('#af52de', '#8438ab')"></span>
-                            <span class="color-dot" style="background: #ff9500;" onclick="changerCouleurPrincipale('#ff9500', '#c67300')"></span>
-                            <span class="color-dot" style="background: #34c759;" onclick="changerCouleurPrincipale('#34c759', '#248a3d')"></span>
-                        </div>
+            <div class="card peach">
+                <div>
+                    <div class="card-header">
+                        <span class="checkbox-container">
+                            <input type="checkbox"> Jogging
+                        </span>
                     </div>
                 </div>
-            </section>
-        </main>
-    </div>
+                <div class="card-time">8:00 - 9:00</div>
+            </div>
 
-    <script src="app.js"></script>
+            <div class="card green">
+                <div>
+                    <div class="card-header">
+                        <span class="checkbox-container">
+                            <input type="checkbox"> Hiking
+                        </span>
+                    </div>
+                </div>
+                <div class="card-time">8:30 - 12:00</div>
+            </div>
+
+            <div class="card pink">
+                <div>
+                    <div class="card-header">
+                        <span class="checkbox-container">
+                            <input type="checkbox"> Department training
+                        </span>
+                    </div>
+                </div>
+                <div class="card-time">9:00 - 12:00</div>
+            </div>
+
+            <div class="card purple">
+                <div>
+                    <div class="card-header">
+                        <span class="checkbox-container">
+                            <input type="checkbox" checked> Pruning garden
+                        </span>
+                    </div>
+                </div>
+                <div class="card-time">7:00 - 8:00</div>
+            </div>
+
+            <div class="card blue">
+                <div>
+                    <div class="card-header">
+                        <span class="checkbox-container">
+                            <input type="checkbox"> Online meeting
+                        </span>
+                    </div>
+                </div>
+                <div class="card-time">8:00 - 10:00</div>
+            </div>
+
+        </div>
+    </main>
+
 </body>
 </html>
