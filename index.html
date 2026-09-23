@@ -12,6 +12,7 @@
         <nav>
             <button class="tab-btn active" onclick="switchTab('accueil')">Accueil / Aujourd'hui</button>
             <button class="tab-btn" onclick="switchTab('inbox')">Inbox</button>
+            <button class="tab-btn" onclick="switchTab('calendar')">Calendrier</button>
         </nav>
     </header>
 
@@ -37,6 +38,17 @@
                 <button onclick="addTask('inbox')">Ajouter à l'Inbox</button>
             </div>
             <ul id="inbox-list" class="task-list"></ul>
+        </section>
+
+        <!-- Onglet Calendrier -->
+        <section id="calendar" class="tab-content">
+            <h2>Calendrier</h2>
+            <div class="calendar-controls">
+                <button onclick="changeView('month')">Mois</button>
+                <button onclick="changeView('week')">Semaine</button>
+                <button onclick="changeView('day')">Jour</button>
+            </div>
+            <div id="calendar-view-container"></div>
         </section>
     </main>
 
