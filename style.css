@@ -1,13 +1,112 @@
 body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f5f5f5;
-  color: #222;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f6f9;
+    color: #333;
+}
+
+header {
+    background-color: #ffffff;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    text-align: center;
 }
 
 h1 {
-  margin: 0;
-  padding: 25px;
-  background: #ffffff;
-  text-align: center;
+    margin: 0 0 15px 0;
+    color: #2c3e50;
+}
+
+nav {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.tab-btn {
+    padding: 10px 20px;
+    border: none;
+    background-color: #e2e8f0;
+    cursor: pointer;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.tab-btn.active {
+    background-color: #3498db;
+    color: white;
+}
+
+main {
+    max-width: 600px;
+    margin: 30px auto;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.task-input-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.task-input-container input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+}
+
+.task-input-container button {
+    padding: 10px 15px;
+    border: none;
+    background-color: #2ecc71;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.task-list {
+    list-style: none;
+    padding: 0;
+}
+
+.task-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    border-bottom: 1px solid #edf2f7;
+}
+
+.task-item.completed span {
+    text-decoration: line-through;
+    color: #94a3b8;
+}
+
+.task-actions {
+    display: flex;
+    gap: 5px;
+}
+
+button.move-btn {
+    background-color: #f39c12;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
 }
